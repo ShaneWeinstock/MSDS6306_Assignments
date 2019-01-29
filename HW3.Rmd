@@ -1,0 +1,137 @@
+---
+title: "HW3"
+author: "Shane W."
+date: "January 28, 2019"
+output: html_document
+---
+# Lecture Assignment 3
+  
+## Questions
+  
+### Question 1 Cloning
+  
+New directory to store the repo
+
+$ mkdir Git_Clones
+
+Navigate to newly created directory
+
+$ cd Git_Clones
+
+Clone Repository to this newly created directory
+
+$ git clone git@github.com:awesomedata/awesome-public-datasets.git
+
+### Question 2
+a. Read in the titanic.csv
+```{r, echo=TRUE}
+getwd()
+ti <- read.csv(file = "Git_Clones/titanic.csv", header=TRUE , sep=',')
+```
+
+b. Female & Male Count
+``` {r, echo=TRUE}
+f_count <- sum(ti$Sex == "female")
+f_count
+m_count <- sum(ti$Sex == "male")
+m_count
+plot(ti$Sex, xlab = "Sex", ylab = "Total Number of Each Sex", main = "Frequency of Females & Males Onboard the Titanic")
+```
+
+c. Means of Age, Fare and Surviavl
+```{r, echo=TRUE}
+means_ti <-data.frame(ti$Age, ti$Fare, ti$Survived)
+sapply(means_ti, mean, na.rm =TRUE)
+```
+
+### Question 3
+
+```{r, echo=TRUE}
+sleepfunction <- function(x){
+
+  ##Read It In 
+  sleepfile <- read.csv(file = x, header = TRUE, sep = ",")
+  
+  #a. Objects for median age, min/max duration of sleep
+  # and mean and standard deviation of RSES
+  median_age <- median(sleepfile$Age,na.rm = TRUE)
+  min_duration <- min(sleepfile$Duration,na.rm = TRUE)
+  max_duration <- max(sleepfile$Duration,na.rm = TRUE)
+  mean_rses <- mean(sleepfile$RSES,na.rm = TRUE)
+  sd_rses <- sd(sleepfile$RSES,na.rm = TRUE)
+  
+  #b. Create a Data Frame contianing median age, the ?g and ?m of RSES,
+  #both divided by 5 and the range of the duration of sleep.
+  info <- data.frame(median_age, mean_rses/5, sd_rses/5, max_duration-min_duration)
+  
+  #c. Set column names of the previously created data frame
+  columns <- c("MedianAge", "SelfEsteem", "SE_SD", "DurationRange")
+  colnames(info) <- columns
+ 
+  #d. Round values in each column in the data frame to two digits
+  info <- round(info, 2)
+  
+  #e. Print
+  info
+}
+```
+
+#### Print the Function
+```{r, echo=TRUE}
+sleepfunction("Git_Clones/sleep_data_01.csv")
+```
+
+### Question 4
+
+a. The Package
+``` {r, echo=TRUE}
+install.packages("fivethirtyeight", repos = "http://cran.us.r-project.org")
+```
+
+b. List Datasets in FiveThirtyEight and Assign22nd toa dat frame
+```{r, echo=TRUE}
+library(fivethirtyeight)
+df <- college_recent_grads
+```
+c. Providing additional detailed list of the datasets
+```{r, echo=TRUE}
+vignette("fivethirtyeight", package = "fivethirtyeight")
+```
+
+d. Dimensions and column names of the data frame.
+```{r, echo=TRUE}
+dim(df)
+colnames(df)
+```
+
+### Question 5
+a. Column Names and count
+```{r, echo=TRUE}
+colnames(df)
+#column Count
+ncol(df)
+```
+
+b. Major Count/Major Category
+```{r, echo=TRUE}
+library(plyr)
+major_count <- count(df, "major_category")
+```
+
+c. Output Graph of Frequency of Majors from Major_Count
+```{r, echo=TRUE}
+par(las=2)
+barplot(major_count$freq, main = "Freq. of Majors from Recent Grads", horiz = TRUE, xlab = "Frequency", ylab = "College Major", col = c("cyan","cyan1","cyan2","cyan3","cyan4","deeppink","deeppink2","deeppink3","deeppink4","darkorchid","darkorchid1","darkorchid2","darkorchid3","darkorchid4", "aquamarine"), names.arg= major_count$major_category)
+```
+
+d. Write df to CSV
+```{r, echo=TRUE}
+write.csv(df, file = "Major_Gradudates.csv", row.names=FALSE)
+```
+
+
+### Question 6
+Link to Homework Repository
++
+Link to this homework
++
