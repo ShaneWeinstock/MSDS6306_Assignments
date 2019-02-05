@@ -1,0 +1,108 @@
+---
+title: "Homework4.6"
+author: "Shane W."
+date: "February 5, 2019"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+title: "Homework 4"
+author: "Shane W."
+date: "February 5, 2019"
+output: html_document
+---
+
+# Harry Potter
+```{r echo=TRUE}
+#Housekeeping
+getwd()
+library(tidyr)
+library(rvest)
+library(dplyr)
+```
+
+a. Review the data at link: http://www.imdb.com/title/tt1201607/fullcredits?ref_=tt_ql_1
+b. Scrape it all.
+``` {r echo=TRUE}
+persons <- read_html("http://www.imdb.com/title/tt1201607/fullcredits?ref_=tt_ql_1")
+personslist <- persons %>% html_nodes(xpath = '//*[@id="fullcredits_content"]/table[3]') %>% html_table(header=TRUE)
+personsdf <- personslist[[1]]
+```
+
+c. Clean it all.
+* Naming and Removing Empty Observations
+``` {r echo= TRUE}
+#Name 'em and remove empties
+colnames(personsdf) <- c("1","Actor","2","Character")
+personsdf = select(personsdf, "Actor", "Character")
+```
+
+* Dealing with duplicative Mr. Warwick and Extra Row (92)
+``` {r echo=TRUE}
+getwd()
+#Duplicate Management
+personsdf$Character[10] <- 'Griphook / Professor Filius Flitwick'
+#Remove the 92
+personsdf <- personsdf[-c(92)]
+```
+
+d. FirstName and Surname
+``` {r echo=TRUE}
+personsdf <- personsdf %>% separate(Actor, c("FirstName","Surname"), "(?=[^ ]+$)", extra = "merge")
+```
+
+e. Presentation Confirmation
+``` {r echo=TRUE}
+head(personsdf, 10)
+```
+
+# 2 SportsBall
+a. Review ESPN Website to discover 'Shooting Statistics' http://www.espn.com/nba/team/stats/_/name/sa/san-antonio-spurs). 
+
+b. Scrape
+```{r echo=TRUE}
+shots <- read_html("http://www.espn.com/nba/team/stats/_/name/sa/san-antonio-spurs)")
+shotslist <- shots %>% html_nodes(xpath='//*[@id="fittPageContainer"]/div[2]/div[5]/div[1]/div/article/div/section/section/section[2]/table') %>% html_table(fill=TRUE)
+shotsdf <- shotslist[[1]]
+```
+
+c. More House Keeping (clean)
+```{r echo=TRUE}
+shotsdf <- shotsdf[-c(1), ]
+shotsdf <- shotsdf[-c(18), ]
+shotsdf <- shotsdf[ , -c(15:258) ]
+shotsdf <- shotsdf[-c(17), ]
+shotsdf <- shotsdf[-c(33), ]
+
+#Vector to store names then input into Columns
+name_vector <- as.vector(shotsdf$X1[2:16])
+shotsdf <- shotsdf[-c(1:16), ]
+
+vector_col <- as.character(shotsdf[1,])
+vector_col <- append(vector_col, "Name", after = 0)
+shotsdf <- shotsdf[-c(1), ]
+
+shotsdf <- cbind(name_vector, shotsdf)
+colnames(shotsdf) <- vector_col
+
+#Team Position Separation
+shotsdf <- shotsdf %>% separate(Name, c("Name", "Position"), "(?=[^ ]+$)", extra = "merge")
+
+#Numeric Formatting
+shotsdf[3:16] <- sapply(shotsdf[3:16], as.numeric)
+sapply(shotsdf, class)
+#First 10
+head(shotsdf, 10)
+```
+
+d. Bar Chart
+``` {r echo=TRUE}
+colors <- RColorBrewer::brewer.pal(length(unique(shotsdf$Position)), name = "Set2")
+shotsdf$color <- colors[as.factor(shotsdf$Position)]
+par(las=2)
+barplot(shotsdf$`FG%`, main = "San Antonio Spurs Field Goal % Per Game", horiz = TRUE, xlab = "Field Goal %", col = shotsdf$color, names.arg = shotsdf$Name, cex.names = 0.7)
+```
