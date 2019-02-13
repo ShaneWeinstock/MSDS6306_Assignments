@@ -1,0 +1,95 @@
+---
+title: "Homework 5"
+author: "Shane W."
+date: "February 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Homework 5
+
+Utilized Libraries and Establishing Working Directory
+```{r, echo = TRUE}
+library(tidyr)
+library(dplyr)
+getwd()
+```
+
+### Question 1: Data Munging
+
+A. Importing, creating, and assigning dataframe df
+```{r, echo=TRUE}
+df <- read.csv(file = "yob2016.txt", header = FALSE, sep = ";")
+colnames(df) <- c("Name","Gender","#Named2016")
+```
+
+B. Display the df
+```{r, echo=TRUE}
+summary(df)
+str(df)
+```
+
+C. Discover the duplicate
+```{r, echo=TRUE}
+#Duplicate noted to have 3 'y's
+grep("y{3}$",df$`Name`,value=TRUE)
+```
+
+D. Remove the Duplicate
+```{r, echo=TRUE}
+y2016 <- df[-grep("y{3}$",df$`Name`),]
+str(y2016)
+```
+
+### Question 2: Data Merging
+
+A. Importing Year of Births 2015
+```{r, echo=TRUE}
+y2015 <- read.csv(file= "yob2015.txt", header = FALSE, sep = ",")
+colnames(y2015) <- c("Name","Gender","#Named2015")
+```
+
+B. Displaying the last 10 rows of the data frame y2015
+```{r, echo=TRUE}
+tail(y2015, 10)
+```
+These last ten rows are particularly interesting becasue they are names that are all given to males, but also that they have all be uitilzed or recorded exactly 5 times.
+
+
+C. The great merger: combining y2015 and y2016
+```{r, echo=TRUE}
+final <- merge(x=y2016,y=y2015,union("Name","Gender"),all = FALSE)
+```
+
+### Question 3: Data Summary
+
+A. Creation of the new column "Total" in final adding 'amount of children' in 2015 and 2016.
+```{r, echo=TRUE}
+final$Total <- final$`#Named2016`+final$`#Named2015`
+#Verify the sum equates to the number reported in 2015 and 2016 combined of: 7,239,231.
+sum(final$Total)
+```
+
+B. Sorting the data by 'total' to discover top 10 names.
+```{r, echo=TRUE}
+# Shows names with the highest count in decending order
+final<-final[order(final$Total, decreasing = TRUE),]
+head(final,n=10)
+```
+Names, in order, are as follows: Emma, Olivia, Noah, Liam, Sophia, Ava, Mason, William, Jacob, and Isabella.
+
+C. Removing the boys and returning the name of girls with the highest counts.
+```{r, echo=TRUE}
+finalgirls <- subset(final,final$Gender=="F")
+head(final, n=10)
+```
+
+D. Write the returned names with highest usage/count to a CSV file without the other columns.
+``` {r, echo=TRUE}
+write.csv(dplyr::select(finalgirls[1:10,],-"Gender",-"#Named2016", -"#Named2015"), row.names=FALSE, file = "MostPopularGirlNames.csv" )
+```
+
+### Upload to GitHub
